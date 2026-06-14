@@ -2,6 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
 import pandas as pd
+import os
 
 class Analyze:
     def __init__(self, processed_df):
@@ -192,6 +193,52 @@ class Analyze:
             f"最大15分钟刷卡量（{max_15_start.strftime('%H:%M')}~{max_15_end.strftime('%H:%M')}）：{max_15_num} 次 PHF15 = {peak_total} / (4 × {max_15_num}) = {phf15:.4f}")
         print()
 
-
     def task4_run(self):
         self.peak_hour_phf()
+
+
+#---任务五----------------------------------------------------------------------------------------------------------------------------
+    def export_route_driver_info(self):
+
+        # 筛选线路号1101 ~ 1120的数据
+        route_arr = np.array(self.df["线路号"])
+        mask_route = (route_arr >= 1101) & (route_arr <= 1120)
+        filter_df = self.df[mask_route].copy()
+
+        # 定义文件夹名称，不存在则新建
+        folder_name = "线路驾驶员信息"
+        if not os.path.exists(folder_name):
+            os.mkdir(folder_name)
+
+        # 存放所有生成文件路径，最后统一打印
+        file_path_list = []
+
+        # 遍历1101到1120全部20条线路
+        for route_id in range(1101, 1121):
+            # 单独取出当前线路的数据
+            single_route_df = filter_df[filter_df["线路号"] == route_id]
+            # 去重
+            unique_mapping = single_route_df[["车辆编号", "驾驶员编号"]].drop_duplicates()
+
+            # 拼接txt文件完整路径
+            file_name = f"{route_id}.txt"
+            full_file_path = os.path.join(folder_name, file_name)
+            file_path_list.append(full_file_path)
+
+            # 打开文件写入内容
+            with open(full_file_path, "w", encoding="utf-8") as f:
+                # 写入
+                f.write(f"线路号: {route_id}\n")
+                for _, row in unique_mapping.iterrows():
+                    car_id = row["车辆编号"]
+                    driver_id = row["驾驶员编号"]
+                    f.write(f"{car_id}\t{driver_id}\n")
+
+        # 按要求打印全部生成的文件路径
+        print("[任务5] 已生成20个文件，路径如下：")
+        for path in file_path_list:
+            print(path)
+        print("\n")
+
+    def task5_run(self):
+        self.export_route_driver_info()

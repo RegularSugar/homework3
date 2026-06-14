@@ -8,3 +8,4 @@ if __name__ == "__main__":#创建实例
     analyzer.task2_run()
     analyzer.task3_run()
     analyzer.task4_run()
+    analyzer.task5_run()

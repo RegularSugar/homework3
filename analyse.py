@@ -34,7 +34,7 @@ class Analyze:
         print(f"早上7点前公共交通上车刷卡量为：{count_early} 次，占全天 {percent_early}%")
         print(f"晚上10点后公共交通上车刷卡量为：{count_late} 次，占全天 {percent_late}%")
         print()
-        return count_early, count_late, percent_early, percent_late
+
 
     def draw_hour_distribution(self):
         # 绘制24小时刷卡量分布柱状图，高亮早晚时段并保存图片
@@ -65,8 +65,9 @@ class Analyze:
         plt.xticks(np.arange(0, 24, 2))
         plt.grid(color="gray", alpha=0.4)
         plt.legend()
+        plt.tight_layout()
         plt.savefig("hour_distribution.png", dpi=150)
-        plt.show()
+        plt.close()
         print("[任务2(b)] 已保存图像：hour_distribution.png\n")
 
     def task2_run(self):
@@ -110,7 +111,7 @@ class Analyze:
         # 取均值最高前15条线路
         top15_df = route_df.head(15)
         # 设置画布
-        plt.figure(figsize=(12, 8))
+        plt.figure(figsize=(10, 8))
 
         # seaborn水平条形图
         sns.barplot(
@@ -142,8 +143,55 @@ class Analyze:
         # 紧凑布局保存图片
         plt.tight_layout()
         plt.savefig("route_stops.png", dpi=150)
-        plt.show()
+        plt.close()
         print("[任务3] 已保存图像：route_stops.png\n")
 
     def task3_run(self):
         self.top15_route_stops()
+
+#---任务4--------------------------------------------------------------------------------------------------
+    def peak_hour_phf(self):
+        # 统计全天每小时刷卡总量，找出高峰小时
+        hour_count_arr = np.zeros(24, dtype=int)
+        for h in range(24):
+            hour_count_arr[h] = np.sum(self.hour_np == h)
+        peak_hour = np.argmax(hour_count_arr)  # 刷卡量最大的小时数值
+        peak_total = hour_count_arr[peak_hour]  # 高峰小时总刷卡量
+
+        # 筛选出高峰小时内的完整原始数据
+        peak_df = self.df[self.df["hour"] == peak_hour].copy()
+
+        # 5分钟粒度统计
+        # 以5分钟为时间窗口进行聚合
+        peak_df["time_5min"] = peak_df["交易时间"].dt.floor("5min")
+        group_5min = peak_df.groupby("time_5min").size().reset_index(name="count_5")
+        max_5_row = group_5min.loc[group_5min["count_5"].idxmax()]
+        max_5_num = max_5_row["count_5"]
+        max_5_start = max_5_row["time_5min"]
+        max_5_end = max_5_start + pd.Timedelta(minutes=5)
+        # 计算PHF5
+        phf5 = peak_total / (12 * max_5_num)
+
+        # 15分钟粒度统计
+        # 以5分钟为时间窗口进行聚合
+        peak_df["time_15min"] = peak_df["交易时间"].dt.floor("15min")
+        group_15min = peak_df.groupby("time_15min").size().reset_index(name="count_15")
+        max_15_row = group_15min.loc[group_15min["count_15"].idxmax()]
+        max_15_num = max_15_row["count_15"]
+        max_15_start = max_15_row["time_15min"]
+        max_15_end = max_15_start + pd.Timedelta(minutes=15)
+        # 计算PHF15
+        phf15 = peak_total / (4 * max_15_num)
+
+        # 4. 按题目固定格式打印输出
+        print("[任务4] 高峰小时系数PHF计算结果：")
+        print(f"高峰小时：{peak_hour:02d}:00 ~ {peak_hour + 1:02d}:00，刷卡量：{peak_total} 次")
+        print(
+            f"最大5分钟刷卡量（{max_5_start.strftime('%H:%M')}~{max_5_end.strftime('%H:%M')}）：{max_5_num} 次 PHF5 = {peak_total} / (12 × {max_5_num}) = {phf5:.4f}")
+        print(
+            f"最大15分钟刷卡量（{max_15_start.strftime('%H:%M')}~{max_15_end.strftime('%H:%M')}）：{max_15_num} 次 PHF15 = {peak_total} / (4 × {max_15_num}) = {phf15:.4f}")
+        print()
+
+
+    def task4_run(self):
+        self.peak_hour_phf()

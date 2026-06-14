@@ -6,3 +6,4 @@ if __name__ == "__main__":#创建实例
     result_df = processor.run()  # 启动预处理工作流
     analyzer = Analyze(result_df)
     analyzer.task2_run()
+    analyzer.task3_run()

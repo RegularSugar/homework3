@@ -1,5 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
+import seaborn as sns
+import pandas as pd
 
 class Analyze:
     def __init__(self, processed_df):
@@ -11,6 +13,7 @@ class Analyze:
         # 全天总有效刷卡次数
         self.total_all = len(self.hour_np)
 
+#---任务2------------------------------------------------------------------------------
     def calculate_early_late_volume(self):
         #统计早7点前、22点后刷卡量并计算占比，使用numpy布尔索引
 
@@ -48,7 +51,7 @@ class Analyze:
                 bar_color_list[h] = "#ff7f24"
 
         # 创建画布并绘制柱状图
-        plt.figure(figsize=(14,8))
+        plt.figure(figsize=(10,8))
         x_coords = np.arange(0, 24)
         plt.bar(x_coords, hour_count_arr,
                 color=bar_color_list,
@@ -67,7 +70,80 @@ class Analyze:
         print("[任务2(b)] 已保存图像：hour_distribution.png\n")
 
     def task2_run(self):
-        # 执行整个任务2流程
+        # 执行整个任务2的流程
         self.calculate_early_late_volume()
         self.draw_hour_distribution()
 
+#---任务3--------------------------------------------------------------------------------------------------
+    def analyze_route_stops(self, df, route_col='线路号', stops_col='ride_stops'):
+        """
+               计算各线路乘客的平均搭乘站点数及其标准差。
+               Parameters
+               ----------
+               df : pd.DataFrame
+                   预处理后的数据集
+               route_col : str
+                   线路号列名
+               stops_col : str
+                   搭乘站点数列名
+               Returns
+               -------
+               pd.DataFrame
+                   包含列：线路号、mean_stops、std_stops，按 mean_stops 降序排列
+        """
+        # 分组聚合：均值、标准差
+        route_group = df.groupby(route_col)[stops_col].agg(
+            mean_stops="mean",
+            std_stops="std"
+        ).reset_index()
+        # 按均值降序排序
+        route_result = route_group.sort_values(by="mean_stops", ascending=False).reset_index(drop=True)
+        return route_result
+
+    def top15_route_stops(self):
+        # 调用函数并打印前10行
+        route_df = self.analyze_route_stops(self.df)
+        print("[任务3] 每条线路的平均搭乘站点数及标准差（前10行）：")
+        print(route_df.head(10))
+        print("\n")
+
+        # 取均值最高前15条线路
+        top15_df = route_df.head(15)
+        # 设置画布
+        plt.figure(figsize=(12, 8))
+
+        # seaborn水平条形图
+        sns.barplot(
+            data=top15_df,
+            x="mean_stops",
+            y="线路号",
+            hue="线路号",
+            palette=sns.color_palette("Blues_d", len(top15_df)),
+            orient="h",
+            legend=False
+        )
+        # 添加误差棒
+        y_pos = np.arange(len(top15_df))
+        plt.errorbar(
+            x=top15_df["mean_stops"],
+            y=y_pos,
+            xerr=top15_df["std_stops"],
+            fmt="none",
+            c="black",
+            capsize=3
+        )
+
+        # 设置柱状图图主标题和轴标题
+        plt.title("Top 15 Routes: Mean Ride Stops (with Std Dev)", fontsize=14)
+        plt.xlabel("Mean Ride Stops", fontsize=12)
+        plt.ylabel("Route ID", fontsize=12)
+        # X轴从0开始
+        plt.xlim(left=0)
+        # 紧凑布局保存图片
+        plt.tight_layout()
+        plt.savefig("route_stops.png", dpi=150)
+        plt.show()
+        print("[任务3] 已保存图像：route_stops.png\n")
+
+    def task3_run(self):
+        self.top15_route_stops()

@@ -77,7 +77,8 @@ class Analyze:
         self.draw_hour_distribution()
 
 #---任务3--------------------------------------------------------------------------------------------------
-    def analyze_route_stops(self, df, route_col='线路号', stops_col='ride_stops'):
+    @staticmethod
+    def analyze_route_stops( df, route_col='线路号', stops_col='ride_stops'):
         """
                计算各线路乘客的平均搭乘站点数及其标准差。
                Parameters
@@ -106,7 +107,7 @@ class Analyze:
         # 调用函数并打印前10行
         route_df = self.analyze_route_stops(self.df)
         print("[任务3] 每条线路的平均搭乘站点数及标准差（前10行）：")
-        print(route_df.head(10))
+        print(route_df.head(10).to_string())
         print("\n")
 
         # 取均值最高前15条线路
@@ -186,7 +187,7 @@ class Analyze:
 
         # 4. 按题目固定格式打印输出
         print("[任务4] 高峰小时系数PHF计算结果：")
-        print(f"高峰小时：{peak_hour:02d}:00 ~ {peak_hour + 1:02d}:00，刷卡量：{peak_total} 次")
+        print(f"高峰小时：{int(peak_hour):02d}:00 ~ {int(peak_hour + 1):02d}:00，刷卡量：{peak_total} 次")
         print(
             f"最大5分钟刷卡量（{max_5_start.strftime('%H:%M')}~{max_5_end.strftime('%H:%M')}）：{max_5_num} 次 PHF5 = {peak_total} / (12 × {max_5_num}) = {phf5:.4f}")
         print(

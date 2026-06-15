@@ -269,7 +269,7 @@ class Analyze:
         # Top 10 司机
         print("\n===Drivers Top 10===")
         for rank, (driver_id, count) in enumerate(top10_driver.items(), 1):
-            print(f"  Top{rank}:  {driver_id}   count={count}")
+            print(f"  Top{rank}:  {int(driver_id)}   count={count}")
         # Top 10 线路
         print("\n===Routes Top 10===")
         for rank, (route_id, count) in enumerate(top10_route.items(), 1):

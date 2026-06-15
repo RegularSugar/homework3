@@ -60,7 +60,3 @@ class Preprocessor:
         return self.df  # 返回处理完成后的干净数据集
 
 
-# 程序入口，脚本直接运行时执行下面代码
-if __name__ == "__main__":
-    processor = Preprocessor("ICData.csv")  # 实例化预处理对象，传入数据文件名
-    result_df = processor.run()  # 启动流水线，获取清洗完毕的数据

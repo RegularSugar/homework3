@@ -52,7 +52,9 @@ class Analyze:
                 bar_color_list[h] = "#ff7f24"
 
         # 创建画布并绘制柱状图
-        plt.figure(figsize=(10,8))
+        fig = plt.figure()
+        fig.set_figwidth(10.0)
+        fig.set_figheight(8.0)
         x_coords = np.arange(0, 24)
         plt.bar(x_coords, hour_count_arr,
                 color=bar_color_list,
@@ -113,7 +115,9 @@ class Analyze:
         # 取均值最高前15条线路
         top15_df = route_df.head(15)
         # 设置画布
-        plt.figure(figsize=(10, 8))
+        fig = plt.figure()
+        fig.set_figwidth(10.0)
+        fig.set_figheight(8.0)
 
         # seaborn水平条形图
         sns.barplot(
@@ -294,7 +298,9 @@ class Analyze:
         )
 
         # 3. 绘制热力图
-        plt.figure(figsize=(14, 7))
+        fig = plt.figure()
+        fig.set_figwidth(14.0)
+        fig.set_figheight(7.0)
         sns.heatmap(
             heatmap_data,
             annot=True,  # 格内标注数值

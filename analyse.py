@@ -233,7 +233,7 @@ class Analyze:
                 for _, row in unique_mapping.iterrows():
                     car_id = row["车辆编号"]
                     driver_id = row["驾驶员编号"]
-                    f.write(f"{car_id}\t{driver_id}\n")
+                    f.write(f"{int(car_id)}\t{int(driver_id)}\n")
 
         # 按要求打印全部生成的文件路径
         print("[任务5] 已生成20个文件，路径如下：")

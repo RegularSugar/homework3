@@ -312,7 +312,7 @@ class Analyze:
         plt.xticks(rotation=0)  # x轴标签不旋转
         plt.tight_layout()
         plt.savefig("performance_heatmap.png", dpi=150, bbox_inches="tight")
-        plt.show()
+        plt.close()
         print("[任务6] 已保存图像：performance_heatmap.png\n")
 
         # 4. 结论说明

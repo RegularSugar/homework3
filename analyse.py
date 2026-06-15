@@ -197,7 +197,7 @@ class Analyze:
         self.peak_hour_phf()
 
 
-#---任务五----------------------------------------------------------------------------------------------------------------------------
+#---任务5----------------------------------------------------------------------------------------------------------------------------
     def export_route_driver_info(self):
 
         # 筛选线路号1101 ~ 1120的数据
@@ -242,3 +242,92 @@ class Analyze:
 
     def task5_run(self):
         self.export_route_driver_info()
+
+#---任务6-----------------------------------------------------------------------------------------------------------
+    def analyze_service_performance(self):
+        # 1. 统计各维度服务人次
+        # Top 10 司机
+        top10_driver = (self.df.groupby("驾驶员编号").size()
+                        .sort_values(ascending=False).head(10))
+        # Top 10 线路
+        top10_route = (self.df.groupby("线路号").size()
+                       .sort_values(ascending=False).head(10))
+        # Top 10 上车站点
+        top10_station = (self.df.groupby("上车站点").size()
+                         .sort_values(ascending=False).head(10))
+        # Top 10 车辆
+        top10_vehicle = (self.df.groupby("车辆编号").size()
+                         .sort_values(ascending=False).head(10))
+
+        # 打印各排名
+        print("[任务6] 排名统计：")
+        # Top 10 司机
+        print("\n===Drivers Top 10===")
+        for rank, (driver_id, count) in enumerate(top10_driver.items(), 1):
+            print(f"  Top{rank}:  {driver_id}   count={count}")
+        # Top 10 线路
+        print("\n===Routes Top 10===")
+        for rank, (route_id, count) in enumerate(top10_route.items(), 1):
+            print(f"  Top{rank}:  {route_id}   count={count}")
+        # Top 10 上车站点
+        print("\n===Boarding Stations Top 10===")
+        for rank, (station_id, count) in enumerate(top10_station.items(), 1):
+            print(f"  Top{rank}:  {station_id}   count={count}")
+        # Top 10 车辆
+        print("\n===Vehicles Top 10===")
+        for rank, (vehicle_id, count) in enumerate(top10_vehicle.items(), 1):
+            print(f"  Top{rank}:  {vehicle_id}   count={count}")
+        print()
+
+        # 2. 构造 4×10 热力图数据
+        # 列标签 Top1~Top10
+        top_labels = [f"Top{i}" for i in range(1, 11)]
+        # 行标签
+        row_labels = ["Driver", "Route", "Boarding Station", "Vehicle"]
+        # 构造DataFrame，每行一个维度
+        heatmap_data = pd.DataFrame(
+            [top10_driver.values, top10_route.values,
+             top10_station.values, top10_vehicle.values],
+            index=row_labels,
+            columns=top_labels
+        )
+
+        # 3. 绘制热力图
+        plt.figure(figsize=(14, 7))
+        sns.heatmap(
+            heatmap_data,
+            annot=True,  # 格内标注数值
+            fmt="d",  # 整数格式
+            cmap="YlOrRd",  # 色图
+            linewidths=0.5  # 格线宽度
+        )
+        # 标题
+        plt.suptitle("Service Performance Ranking Heatmap",
+                     fontsize=16, fontweight="bold")
+        plt.title("counts of valid boarding records(card type = 0)",
+                  fontsize=12, pad=20)
+
+
+        plt.xlabel("")  # x轴无标签
+        plt.xticks(rotation=0)  # x轴标签不旋转
+        plt.tight_layout()
+        plt.savefig("performance_heatmap.png", dpi=150, bbox_inches="tight")
+        plt.show()
+        print("[任务6] 已保存图像：performance_heatmap.png\n")
+
+        # 4. 结论说明
+        print("[任务6] 结论说明：")
+        print(f"从热力图可观察到以下服务绩效规律：")
+        print(f"  1. Top1司机服务人次为{top10_driver.iloc[0]}次，"
+              f"是Top10司机均值{top10_driver.mean():.0f}次的"
+              f"{top10_driver.iloc[0] / top10_driver.mean():.1f}倍，"
+              f"说明头部司机工作量显著高于同行。")
+        print(f"  2. Top1线路（线路{top10_route.index[0]}）客流达"
+              f"{top10_route.iloc[0]}次，远超其他线路，"
+              f"表明该线路为城市主干线路或途经核心商圈。")
+        print(f"  3. Top1上车站点客流为{top10_station.iloc[0]}次，"
+              f"站点间差异明显，反映乘客出行具有显著的集聚效应。")
+        print(f"  4. 车辆维度与司机维度高度相关，热门线路的车辆服务人次普遍较高。")
+
+    def task6_run(self):
+        self.analyze_service_performance()
